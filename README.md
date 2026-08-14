@@ -1,39 +1,37 @@
-# Xitcoin Migration Site
+# Xitcoin Migration — V1 to V2
 
-Private engineering repository for the recovery, maintenance and controlled
-reconstruction of `migration.xitcoin.org`.
+Operational source and continuity documentation for `migration.xitcoin.org`.
 
 ## Purpose
 
-Following community approval, the migration provides a one-way path from the
-legacy XTC token to the current XTC token on Cronos. Legacy XTC submitted
-through the migration contract is sent to the designated dead address. The
-contract releases the corresponding current XTC from its pre-funded balance.
+Xitcoin Migration moves holders from the historical XTC contract (**V1**) to the current XTC contract (**V2**) on Cronos.
 
-The current XTC token uses a proxy architecture. This preserves the canonical
-token address while allowing implementation maintenance through its established
-governance process.
+The migration is one-way at a 1:1 ratio. Legacy XTC submitted through the migration contract is sent to the designated dead address. The corresponding current XTC is released from the migration contract’s pre-funded balance.
 
-## Repository layout
+## Why V2
 
-- `legacy-deployment/` — immutable recovery baseline found on the server on
-  2026-08-14.
-- `docs/` — architecture, contract references and operational procedures.
-- `app/` — future readable application source. It is intentionally absent until
-  the reconstruction is implemented and reviewed.
+V2 retains the canonical current XTC address while using an established proxy architecture. This enables future compatibility and implementation maintenance through the applicable governance process without changing the canonical token address or increasing supply.
 
-## Engineering policy
+The V1 → V2 migration path and V2 architecture were approved by the Xitcoin community.
 
-- No production deployment is performed from the recovered legacy baseline.
-- Changes are reviewed through pull requests.
-- Runtime credentials, private keys and wallet secrets do not belong in Git.
-- Public wording uses `XTC`, never `$XTC`.
+## References
 
-## Current references
+| Reference | Address |
+| --- | --- |
+| Legacy XTC — V1 | `0xDD646291D2fff52c75F27CCDAdD0D4C2A24f37Dd` |
+| Current XTC — V2 proxy | `0xE45FE733BC8617FA6DAC8437FC44B5FFFA949991` |
+| Migration contract | `0x5A570197e4835d0c2F2F956026981E0cff50A8c9` |
+| Designated dead address | `0x000000000000000000000000000000000000dEaD` |
 
-- Legacy XTC: `0xDD646291D2fff52c75F27CCDAdD0D4C2A24f37Dd`
-- Current XTC proxy: `0xE45FE733BC8617FA6DAC8437FC44B5FFFA949991`
-- Migration contract: `0x5A570197e4835d0c2F2F956026981E0cff50A8c9`
+## Site behavior
 
-See [the contract reference](docs/migration-contract.md) and
-[operations guide](docs/operations.md).
+- Wallet access occurs only after a user selects and connects a wallet.
+- Public counters use the same-origin `/api/migration-status` endpoint and do not request wallet access.
+- The interface supports 30 languages; English remains the reference in case of discrepancy.
+- Private keys, seed phrases and wallet credentials are never stored by the site.
+
+## Continuity
+
+The migration contract and its on-chain state remain independent of website availability. A website outage does not alter the contract, token balances or migration state.
+
+See [site operations](docs/site-operations.md) for health checks, local rebuilding and restoration procedures.
