@@ -321,17 +321,124 @@ function addStyles() {
   if (document.getElementById('xitcoin-language-styles')) return
   const style = document.createElement('style')
   style.id = 'xitcoin-language-styles'
-  style.textContent = '#xitcoin-language-group{display:flex;align-items:center;gap:8px;flex:0 0 auto;white-space:nowrap}#xitcoin-language{max-width:116px}@media(max-width:720px){#xitcoin-language-group{width:100%;justify-content:flex-end;gap:6px}#xitcoin-language{height:42px;max-width:100px}}'
+  style.textContent = `#xitcoin-language-group{display:flex;align-items:center;gap:8px;flex:0 0 auto;white-space:nowrap}#xitcoin-language{max-width:116px}#xitcoin-mobile-menu-toggle,#xitcoin-mobile-menu-drawer,#xitcoin-mobile-menu-overlay{display:none}@media(max-width:960px){header{position:relative!important;overflow:visible!important}header [data-xitcoin-logo]{display:flex;min-width:0;max-width:calc(100vw - 78px);overflow:hidden;white-space:nowrap}header [data-xitcoin-mobile-navlink]{display:none!important}#xitcoin-mobile-menu-toggle{display:inline-flex;position:absolute;top:50%;right:14px;z-index:10001;align-items:center;justify-content:center;width:42px;height:42px;transform:translateY(-50%);border:0;border-radius:8px;background:transparent;color:#f5f5f5;font:700 22px/1 system-ui;cursor:pointer;box-shadow:none!important;outline:none}#xitcoin-mobile-menu-overlay{position:fixed;inset:0;z-index:10010;background:rgba(0,0,0,.58)}#xitcoin-mobile-menu-drawer{display:block;position:fixed;top:0;right:0;bottom:0;z-index:10011;width:min(86vw,340px);padding:84px 20px 28px;overflow-y:auto;border-left:1px solid rgba(255,255,255,.14);background:#0b0b10;box-shadow:-20px 0 50px rgba(0,0,0,.45);transform:translateX(105%);transition:transform .22s ease}#xitcoin-mobile-menu-close{position:absolute;top:16px;right:16px;width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#15151b;color:#fff;font:400 28px/1 system-ui;cursor:pointer;box-shadow:none!important;outline:none}#xitcoin-mobile-menu-drawer.is-open{transform:translateX(0)}#xitcoin-mobile-menu-overlay.is-open{display:block}#xitcoin-mobile-menu-links{display:grid;gap:8px;margin-bottom:24px}#xitcoin-mobile-menu-links a{display:block;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.1);color:#fff;text-decoration:none;font:700 15px/1.3 system-ui}#xitcoin-mobile-menu-links a[data-xitcoin-buy-link]{margin-top:8px;padding:14px 16px;border:1px solid rgba(251,141,0,.72);border-radius:12px;background:rgba(251,141,0,.08);color:#ffad33}#xitcoin-mobile-menu-drawer #xitcoin-language-group{display:grid;grid-template-columns:1fr;width:100%;gap:10px}#xitcoin-mobile-menu-drawer #xitcoin-language{width:100%;max-width:none;height:44px}#xitcoin-mobile-menu-drawer #xitcoin-language-group button{width:100%;min-height:46px;white-space:nowrap}}`
   document.head.append(style)
+}
+
+function setupMobileNavigation() {
+  const header = document.querySelector('header')
+  const group = document.getElementById('xitcoin-language')
+    ?.closest('#xitcoin-language-group')
+
+  if (!header || !group || document.getElementById('xitcoin-mobile-menu-toggle')) return
+
+  const links = [...header.querySelectorAll('a')]
+  const [logo, ...navigationLinks] = links
+  if (!logo) return
+
+  logo.setAttribute('data-xitcoin-logo', '')
+  for (const link of navigationLinks) link.setAttribute('data-xitcoin-mobile-navlink', '')
+
+  const groupHome = group.parentElement
+  const groupNextSibling = group.nextSibling
+
+  const toggle = document.createElement('button')
+  toggle.id = 'xitcoin-mobile-menu-toggle'
+  toggle.type = 'button'
+  toggle.setAttribute('aria-label', 'Menu')
+  toggle.setAttribute('aria-expanded', 'false')
+  toggle.textContent = '☰'
+
+  const overlay = document.createElement('div')
+  overlay.id = 'xitcoin-mobile-menu-overlay'
+
+  const drawer = document.createElement('aside')
+  drawer.id = 'xitcoin-mobile-menu-drawer'
+  drawer.setAttribute('aria-label', 'Navigation')
+
+  const close = document.createElement('button')
+  close.id = 'xitcoin-mobile-menu-close'
+  close.type = 'button'
+  close.setAttribute('aria-label', 'Close menu')
+  close.textContent = '×'
+
+  const menuLinks = document.createElement('nav')
+  menuLinks.id = 'xitcoin-mobile-menu-links'
+  for (const link of navigationLinks) {
+    const copy = link.cloneNode(true)
+    if (link.textContent.trim() === 'Buy XTC') {
+      copy.textContent = 'Buy Xitcoin (XTC)'
+      copy.setAttribute('data-xitcoin-buy-link', '')
+    }
+    copy.removeAttribute('data-xitcoin-mobile-navlink')
+    copy.addEventListener('click', closeMenu)
+    menuLinks.append(copy)
+  }
+
+  drawer.append(close, menuLinks)
+  document.body.append(overlay, drawer)
+  header.append(toggle)
+
+  function applyLayout() {
+    const mobile = window.matchMedia('(max-width:960px)').matches
+    if (mobile) {
+      if (!drawer.contains(group)) drawer.append(group)
+    } else if (groupHome && !groupHome.contains(group)) {
+      groupHome.insertBefore(group, groupNextSibling)
+      closeMenu()
+    }
+  }
+
+  function closeMenu() {
+    drawer.classList.remove('is-open')
+    overlay.classList.remove('is-open')
+    toggle.setAttribute('aria-expanded', 'false')
+  }
+
+  close.addEventListener('click', closeMenu)
+
+  toggle.addEventListener('click', () => {
+    applyLayout()
+    const open = !drawer.classList.contains('is-open')
+    drawer.classList.toggle('is-open', open)
+    overlay.classList.toggle('is-open', open)
+    toggle.setAttribute('aria-expanded', String(open))
+    if (open) applyLocale()
+  })
+
+  overlay.addEventListener('click', closeMenu)
+  window.addEventListener('resize', applyLayout, { passive: true })
+  applyLayout()
 }
 
 function initialize() {
   addStyles()
   addSelector()
+  setupMobileNavigation()
   addLocaleNotice()
   applyLocale()
 }
 
-window.addEventListener('load', () => {
+let selectorRetry
+
+function initializeWhenReady() {
   initialize()
-})
+  if (document.getElementById('xitcoin-language') || selectorRetry) return
+
+  let attempts = 0
+  selectorRetry = window.setInterval(() => {
+    initialize()
+    attempts += 1
+    if (document.getElementById('xitcoin-language') || attempts >= 60) {
+      window.clearInterval(selectorRetry)
+      selectorRetry = undefined
+    }
+  }, 250)
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeWhenReady, { once: true })
+} else {
+  initializeWhenReady()
+}
+window.addEventListener('load', initializeWhenReady, { once: true })
