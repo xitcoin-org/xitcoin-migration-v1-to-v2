@@ -411,8 +411,79 @@ function setupMobileNavigation() {
   applyLayout()
 }
 
+
+function addResponsiveLayoutGuards() {
+  if (document.getElementById('xitcoin-responsive-layout-guards')) return
+
+  const style = document.createElement('style')
+  style.id = 'xitcoin-responsive-layout-guards'
+  style.textContent = `
+    [data-side][data-align] a {
+      display: block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    @media (min-width: 380px) {
+      [data-side][data-align] a {
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+    }
+
+    #xitcoin-mobile-menu-drawer a[href="https://inoswap.org"] {
+      display: flex !important;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    #xitcoin-mobile-menu-drawer a[href="https://inoswap.org"]::after {
+      content: "↗";
+      flex: 0 0 auto;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    @media (max-width: 959px) {
+      header button[class*="md:hidden"] {
+        display: none !important;
+      }
+
+      header [data-xitcoin-logo] {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: calc(100vw - 82px);
+      }
+
+      header [data-xitcoin-logo] img,
+      header [data-xitcoin-logo] > span:first-child {
+        flex: 0 0 auto;
+      }
+    }
+
+    @media (max-width: 359px) {
+      header [data-xitcoin-logo] > span:last-child span:last-child {
+        display: none;
+      }
+    }
+
+    @media (max-width: 299px) {
+      header [data-xitcoin-logo] > span:last-child {
+        display: none;
+      }
+    }
+  `
+  document.head.append(style)
+}
+
 function initialize() {
   addStyles()
+  addResponsiveLayoutGuards()
   addSelector()
   setupMobileNavigation()
   addLocaleNotice()
