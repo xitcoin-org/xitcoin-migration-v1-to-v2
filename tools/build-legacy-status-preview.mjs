@@ -62,6 +62,23 @@ for (const [from, to] of [
   source = source.split(from).join(to)
 }
 
+for (const [from, to] of [
+  [
+    'This migration is irreversible. Old XTC tokens will be permanently burned. You will receive new XTC tokens only after the old tokens are confirmed burned.',
+    'This migration is irreversible. Old XTC is sent to the designated dead address. You receive XTC after the transaction is confirmed on-chain.',
+  ],
+  [
+    'This migration is irreversible. Old XTC tokens will be sent. You will receive new XTC tokens only after the old tokens are confirmed burned.',
+    'This migration is irreversible. Old XTC is sent to the designated dead address. You receive XTC after the transaction is confirmed on-chain.',
+  ],
+  [
+    'Old XTC tokens are sent and sent to the',
+    'Old XTC tokens are sent to the',
+  ],
+]) {
+  source = source.split(from).join(to)
+}
+
 if (source.includes('cronos.org/explorer/api?module=account')) {
   throw new Error('Legacy explorer request remains after patch')
 }
@@ -81,7 +98,7 @@ writeFileSync(resolve(output, 'BUILD-METADATA.json'), JSON.stringify({
   generated_at: new Date().toISOString(),
   source: 'legacy-deployment/dist',
   status_data: 'Cronos JSON-RPC eth_call',
-  languages: ['en', 'fr'],
+  languages: ['en', 'fr', 'es', 'de', 'pt', 'zh', 'ja', 'ar'],
 }, null, 2) + '\n')
 
 console.log(`[OK] Preview build created: ${output}`)
