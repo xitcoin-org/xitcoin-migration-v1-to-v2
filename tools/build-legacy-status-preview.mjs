@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createHash } from 'node:crypto'
 
 import { cpSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -85,15 +86,21 @@ if (source.includes('cronos.org/explorer/api?module=account')) {
 
 cpSync(baseline, output, { recursive: true })
 writeFileSync(resolve(output, bundle), source)
+const localizationSource = readFileSync(localization, 'utf8')
+const localizationVersion = createHash('sha256')
+  .update(localizationSource)
+  .digest('hex')
+  .slice(0, 12)
+
 const index = readFileSync(resolve(output, 'index.html'), 'utf8')
 if (!index.includes('</head>') || index.includes('xitcoin-localization.js')) {
   throw new Error('Unexpected legacy index: localization injection point unavailable')
 }
 writeFileSync(
   resolve(output, 'index.html'),
-  index.replace('</head>', '    <script defer src="/assets/xitcoin-localization.js"></script>\n  </head>'),
+  index.replace('</head>', `    <script defer src="/assets/xitcoin-localization.js?v=${localizationVersion}"></script>\n  </head>`),
 )
-cpSync(localization, resolve(output, 'assets/xitcoin-localization.js'))
+writeFileSync(resolve(output, 'assets/xitcoin-localization.js'), localizationSource)
 writeFileSync(resolve(output, 'BUILD-METADATA.json'), JSON.stringify({
   generated_at: new Date().toISOString(),
   source: 'legacy-deployment/dist',
