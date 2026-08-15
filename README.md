@@ -15,7 +15,7 @@ Read [why Xitcoin migrated from V1 to V2](docs/migration-rationale.md) before re
 | Migration contract | `0x5A570197e4835d0c2F2F956026981E0cff50A8c9` |
 | Designated dead address | `0x000000000000000000000000000000000000dEaD` |
 
-Verified sources, deployment metadata and audit scope are maintained in [`xitcoin-org/contracts`](https://github.com/xitcoin-org/contracts).
+Verified sources, deployment metadata and exact audit scope are maintained in [`xitcoin-org/contracts`](https://github.com/xitcoin-org/contracts).
 
 ## Repository layout
 
@@ -59,3 +59,7 @@ The migration contract operates independently of the hosted website. If the inte
 - [Migration contract](docs/migration-contract.md)
 - [Release operations](docs/operations.md)
 - [Site operations](docs/site-operations.md)
+
+## Licence
+
+Original Xitcoin-authored material is available under the [MIT License](LICENSE). Third-party components retain their own terms; see [third-party notices](THIRD_PARTY_NOTICES.md).
