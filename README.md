@@ -59,6 +59,7 @@ The migration contract operates independently of the hosted website. If the inte
 - [Migration contract](docs/migration-contract.md)
 - [Release operations](docs/operations.md)
 - [Site operations](docs/site-operations.md)
+- [Historical publications](docs/reference-material/README.md)
 
 ## Security
 
