@@ -3,10 +3,10 @@
 ## Public checks
 
 ```bash
-curl -fsSIL --connect-timeout 8 --max-time 15   https://migration.xitcoin.org/
+curl -fsSIL   --connect-timeout 8   --max-time 15   https://migration.xitcoin.org/
 
-curl -fsS --connect-timeout 8 --max-time 15   https://migration.xitcoin.org/api/migration-status |
-jq .
+curl -fsS   --connect-timeout 8   --max-time 15   https://migration.xitcoin.org/api/migration-status |
+  jq .
 ```
 
 An HTTP success response confirms availability. Contract behavior must be verified separately against Cronos.
