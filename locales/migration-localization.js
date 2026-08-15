@@ -1551,7 +1551,16 @@ const availableLocales = Object.fromEntries(
 )
 
 const baseText = new WeakMap()
-let selected = 'en'
+const languagePreferenceKey = 'xitcoin.language'
+
+let selected = (() => {
+  try {
+    const saved = localStorage.getItem(languagePreferenceKey)
+    return saved && availableLocales[saved] ? saved : 'en'
+  } catch {
+    return 'en'
+  }
+})()
 
 function localizedText(value) {
   const dictionary = translations[selected]
@@ -1597,7 +1606,14 @@ function addSelector() {
   selector.style.cssText = 'height:46px;padding:0 8px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#111217;color:#fff;font:700 12px system-ui;cursor:pointer;'
   selector.addEventListener('change', () => {
     selected = selector.value
-    applyLocale()
+
+    try {
+      localStorage.setItem(languagePreferenceKey, selected)
+    } catch {
+      // The reload still applies the selected language when storage is available.
+    }
+
+    window.location.reload()
   })
   const walletControl = walletButton.parentElement
   const parent = walletControl?.parentElement
