@@ -54,27 +54,42 @@
 
   function candidates() {
     const announced = [...providers.values()]
-    if (announced.length) return announced
+    const items = announced.length
+      ? announced
+      : window.ethereum?.request
+        ? [{
+            provider: window.ethereum,
+            info: {
+              uuid: 'injected',
+              name: window.ethereum.isRabby ? 'Rabby' : window.ethereum.isMetaMask ? 'MetaMask' : 'Browser wallet',
+              rdns: 'injected',
+            },
+          }]
+        : []
 
-    if (window.ethereum?.request) {
-      return [{
-        provider: window.ethereum,
+    if (typeof window.__xitcoinConnectWalletConnect === 'function') {
+      items.push({
+        provider: null,
         info: {
-          uuid: 'injected',
-          name: window.ethereum.isRabby ? 'Rabby' : window.ethereum.isMetaMask ? 'MetaMask' : 'Browser wallet',
-          rdns: 'injected',
+          uuid: 'walletconnect',
+          name: 'WalletConnect',
+          rdns: 'walletconnect',
         },
-      }]
+      })
     }
 
-    return []
+    return items
   }
 
   function copy() {
     return messages[(document.documentElement.lang || 'en').split('-')[0]] || messages.en
   }
 
+  // xitcoin-mobile-walletconnect-direct
   function chooseProvider() {
+    if (!window.ethereum?.request && typeof window.__xitcoinConnectWalletConnect === 'function') {
+      return window.__xitcoinConnectWalletConnect()
+    }
     return new Promise((resolve, reject) => {
       window.dispatchEvent(new Event('eip6963:requestProvider'))
 
@@ -109,7 +124,14 @@
         const list = document.createElement('div')
         list.style.cssText = 'display:grid;gap:10px'
 
-        for (const item of items) {
+
+// xitcoin-walletconnect-icon
+const walletConnectIcon = 'data:image/svg+xml,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="10" fill="#3B99FC"/><path fill="#fff" d="M10 14.5c5.5-5.3 14.5-5.3 20 0l1.2 1.2-2.2 2.2-1.2-1.2c-4.3-4.1-11.3-4.1-15.6 0L11 17.9l-2.2-2.2 1.2-1.2Zm15.4 5.4 2.2 2.2-5.4 5.2a3.1 3.1 0 0 1-4.4 0l-5.4-5.2 2.2-2.2 5.4 5.2 5.4-5.2Z"/></svg>',
+)
+
+for (const item of items) {
+    if (item.info.uuid === 'walletconnect' && !item.info.icon) item.info.icon = walletConnectIcon
           const button = document.createElement('button')
           button.type = 'button'
           button.style.cssText =
@@ -130,15 +152,28 @@
           label.textContent = item.info.name
           button.append(label)
 
-          button.addEventListener('click', () => {
-            window.__xitcoinSelectedProvider = item.provider
-            localStorage.setItem(
-              preferenceKey,
-              JSON.stringify({ uuid: item.info.uuid, rdns: item.info.rdns }),
-            )
-            settleReady()
-            overlay.remove()
-            resolve(item.provider)
+          button.addEventListener('click', async () => {
+            try {
+              const selectedProvider = item.info.uuid === 'walletconnect'
+                ? await window.__xitcoinConnectWalletConnect()
+                : item.provider
+
+              if (!selectedProvider?.request) {
+                throw new Error('Selected wallet is unavailable')
+              }
+
+              window.__xitcoinSelectedProvider = selectedProvider
+              localStorage.setItem(
+                preferenceKey,
+                JSON.stringify({ uuid: item.info.uuid, rdns: item.info.rdns }),
+              )
+              settleReady()
+              overlay.remove()
+              resolve(selectedProvider)
+            } catch (error) {
+              overlay.remove()
+              reject(error)
+            }
           })
 
           list.append(button)
@@ -160,6 +195,15 @@
       }, 250)
     })
   }
+
+  window.__xitcoinClearProviderPreference = () => {
+    window.__xitcoinSelectedProvider = null
+    localStorage.removeItem(preferenceKey)
+  }
+
+  window.addEventListener('xitcoin:wallet-disconnect', () => {
+    window.__xitcoinClearProviderPreference()
+  })
 
   window.__xitcoinSelectProvider = chooseProvider
 })()

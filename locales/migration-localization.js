@@ -1599,9 +1599,11 @@ function addSelector() {
     selected = selector.value
     applyLocale()
   })
-  const parent = walletButton.parentElement
-  parent.replaceChild(group, walletButton)
-  group.append(selector, walletButton)
+  const walletControl = walletButton.parentElement
+  const parent = walletControl?.parentElement
+  if (!parent) return
+  parent.replaceChild(group, walletControl)
+  group.append(selector, walletControl)
 }
 
 function addLocaleNotice() {
@@ -1618,7 +1620,7 @@ function addStyles() {
   if (document.getElementById('xitcoin-language-styles')) return
   const style = document.createElement('style')
   style.id = 'xitcoin-language-styles'
-  style.textContent = `#xitcoin-language-group{display:flex;align-items:center;gap:8px;flex:0 0 auto;white-space:nowrap}#xitcoin-language{max-width:116px}#xitcoin-mobile-menu-toggle,#xitcoin-mobile-menu-drawer,#xitcoin-mobile-menu-overlay{display:none}@media(max-width:960px){header{position:relative!important;overflow:visible!important}header [data-xitcoin-logo]{display:flex;min-width:0;max-width:calc(100vw - 78px);overflow:hidden;white-space:nowrap}header [data-xitcoin-mobile-navlink]{display:none!important}#xitcoin-mobile-menu-toggle{display:inline-flex;position:absolute;top:50%;right:14px;z-index:10001;align-items:center;justify-content:center;width:42px;height:42px;transform:translateY(-50%);border:0;border-radius:8px;background:transparent;color:#f5f5f5;font:700 22px/1 system-ui;cursor:pointer;box-shadow:none!important;outline:none}#xitcoin-mobile-menu-overlay{position:fixed;inset:0;z-index:10010;background:rgba(0,0,0,.58)}#xitcoin-mobile-menu-drawer{display:block;position:fixed;top:0;right:0;bottom:0;z-index:10011;width:min(86vw,340px);padding:84px 20px 28px;overflow-y:auto;border-left:1px solid rgba(255,255,255,.14);background:#0b0b10;box-shadow:-20px 0 50px rgba(0,0,0,.45);transform:translateX(105%);transition:transform .22s ease}#xitcoin-mobile-menu-close{position:absolute;top:16px;right:16px;width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#15151b;color:#fff;font:400 28px/1 system-ui;cursor:pointer;box-shadow:none!important;outline:none}#xitcoin-mobile-menu-drawer.is-open{transform:translateX(0)}#xitcoin-mobile-menu-overlay.is-open{display:block}#xitcoin-mobile-menu-links{display:grid;gap:8px;margin-bottom:24px}#xitcoin-mobile-menu-links a{display:block;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.1);color:#fff;text-decoration:none;font:700 15px/1.3 system-ui}#xitcoin-mobile-menu-links a[data-xitcoin-buy-link]{margin-top:8px;padding:14px 16px;border:1px solid rgba(251,141,0,.72);border-radius:12px;background:rgba(251,141,0,.08);color:#ffad33}#xitcoin-mobile-menu-drawer #xitcoin-language-group{display:grid;grid-template-columns:1fr;width:100%;gap:10px}#xitcoin-mobile-menu-drawer #xitcoin-language{width:100%;max-width:none;height:44px}#xitcoin-mobile-menu-drawer #xitcoin-language-group button{width:100%;min-height:46px;white-space:nowrap}}`
+  style.textContent = `#xitcoin-language-group{display:flex;align-items:center;gap:8px;flex:0 0 auto;white-space:nowrap}#xitcoin-language-group>div.relative{position:relative;flex:0 0 auto}@media(max-width:720px){#xitcoin-mobile-menu-drawer #xitcoin-language-group>div.relative{width:100%}#xitcoin-mobile-menu-drawer #xitcoin-language-group>div.relative>button{width:100%}}#xitcoin-language{max-width:116px}#xitcoin-mobile-menu-toggle,#xitcoin-mobile-menu-drawer,#xitcoin-mobile-menu-overlay{display:none}@media(max-width:960px){header{position:relative!important;overflow:visible!important}header [data-xitcoin-logo]{display:flex;min-width:0;max-width:calc(100vw - 78px);overflow:hidden;white-space:nowrap}header [data-xitcoin-mobile-navlink]{display:none!important}#xitcoin-mobile-menu-toggle{display:inline-flex;position:absolute;top:50%;right:14px;z-index:10001;align-items:center;justify-content:center;width:42px;height:42px;transform:translateY(-50%);border:0;border-radius:8px;background:transparent;color:#f5f5f5;font:700 22px/1 system-ui;cursor:pointer;box-shadow:none!important;outline:none}#xitcoin-mobile-menu-overlay{position:fixed;inset:0;z-index:10010;background:rgba(0,0,0,.58)}#xitcoin-mobile-menu-drawer{display:block;position:fixed;top:0;right:0;bottom:0;z-index:10011;width:min(86vw,340px);padding:84px 20px 28px;overflow-y:auto;border-left:1px solid rgba(255,255,255,.14);background:#0b0b10;box-shadow:-20px 0 50px rgba(0,0,0,.45);transform:translateX(105%);transition:transform .22s ease}#xitcoin-mobile-menu-close{position:absolute;top:16px;right:16px;width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#15151b;color:#fff;font:400 28px/1 system-ui;cursor:pointer;box-shadow:none!important;outline:none}#xitcoin-mobile-menu-drawer.is-open{transform:translateX(0)}#xitcoin-mobile-menu-overlay.is-open{display:block}#xitcoin-mobile-menu-links{display:grid;gap:8px;margin-bottom:24px}#xitcoin-mobile-menu-links a{display:block;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.1);color:#fff;text-decoration:none;font:700 15px/1.3 system-ui}#xitcoin-mobile-menu-links a[data-xitcoin-buy-link]{margin-top:8px;padding:14px 16px;border:1px solid rgba(251,141,0,.72);border-radius:12px;background:rgba(251,141,0,.08);color:#ffad33}#xitcoin-mobile-menu-drawer #xitcoin-language-group{display:grid;grid-template-columns:1fr;width:100%;gap:10px}#xitcoin-mobile-menu-drawer #xitcoin-language{width:100%;max-width:none;height:44px}#xitcoin-mobile-menu-drawer #xitcoin-language-group button{width:100%;min-height:46px;white-space:nowrap}}`
   document.head.append(style)
 }
 
@@ -1673,7 +1675,9 @@ function setupMobileNavigation() {
   }
 
   drawer.append(close, menuLinks)
-  document.body.append(overlay, drawer)
+  const reactRoot = document.getElementById('root')
+  if (!reactRoot) throw new Error('React root not found')
+  reactRoot.append(overlay, drawer)
   header.append(toggle)
 
   function applyLayout() {
@@ -1810,3 +1814,28 @@ if (document.readyState === 'loading') {
   initializeWhenReady()
 }
 window.addEventListener('load', initializeWhenReady, { once: true })
+
+
+// xitcoin-mobile-walletconnect-click
+document.addEventListener('click', (event) => {
+  if (!window.matchMedia('(max-width: 720px)').matches) return
+  if (window.ethereum?.request) return
+
+  const button = event.target.closest(
+    '#xitcoin-mobile-menu-drawer #xitcoin-language-group button',
+  )
+  if (!button || /^0x[a-f0-9]{4}/i.test(button.textContent.trim())) return
+  if (typeof window.__xitcoinConnectWalletConnect !== 'function') return
+
+  event.preventDefault()
+  event.stopImmediatePropagation()
+
+  document.getElementById('xitcoin-mobile-menu-drawer')?.classList.remove('is-open')
+  document.getElementById('xitcoin-mobile-menu-overlay')?.classList.remove('is-open')
+
+  window.setTimeout(() => {
+    window.__xitcoinConnectWalletConnect().catch((error) => {
+      console.error('WalletConnect mobile failed:', error)
+    })
+  }, 0)
+}, true)

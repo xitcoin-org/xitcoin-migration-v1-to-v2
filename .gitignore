@@ -1,2 +1,4 @@
 
 /site/
+wallets/vendor/node_modules/
+wallets/xitcoin-walletconnect-provider.js

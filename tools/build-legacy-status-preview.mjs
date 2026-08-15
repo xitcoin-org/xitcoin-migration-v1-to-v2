@@ -10,6 +10,8 @@ const output = resolve(root, 'site')
 const bundle = 'assets/index-DqekdNqy.js'
 const localization = resolve(root, 'locales/migration-localization.js')
 const walletPicker = resolve(root, 'wallets/eip6963-picker.js')
+const walletConnectBridge = resolve(root, 'wallets/walletconnect-bridge.js')
+const walletConnectBundle = resolve(root, 'wallets/xitcoin-walletconnect-provider.js')
 
 if (!existsSync(resolve(baseline, bundle))) {
   throw new Error(`Legacy bundle not found: ${resolve(baseline, bundle)}`)
@@ -21,6 +23,10 @@ if (!existsSync(localization)) {
 
 if (!existsSync(walletPicker)) {
   throw new Error(`Wallet picker source not found: ${walletPicker}`)
+}
+
+if (!existsSync(walletConnectBridge) || !existsSync(walletConnectBundle)) {
+  throw new Error('WalletConnect assets are missing')
 }
 
 if (existsSync(output)) {
@@ -37,6 +43,15 @@ const completedMigration = 'const U=await z4(e);n('
 const completedMigrationReplacement = 'const U=await z4(e);window.dispatchEvent(new Event("xitcoin:migration-confirmed")),n('
 
 let source = readFileSync(resolve(baseline, bundle), 'utf8')
+
+const walletButtonGapBefore = 'justify-center gap-0 min-w-[150px] px-1.5 sm:gap-2 sm:px-4'
+const walletButtonGapAfter = 'justify-center gap-2 min-w-[150px] px-4'
+
+if (!source.includes(walletButtonGapBefore)) {
+  throw new Error('Style du bouton portefeuille introuvable')
+}
+source = source.replace(walletButtonGapBefore, walletButtonGapAfter)
+
 if (!source.includes(originalLoader)) {
   throw new Error('Unexpected legacy bundle: the known status loader was not found')
 }
@@ -120,12 +135,27 @@ source = source.replace(
   'className:"text-[#ffaa33] underline break-all"'
 )
 
+const disconnectState = 'f=()=>{s(null),l(!1),localStorage.removeItem("walletConnected")}'
+const disconnectStateFixed = 'f=()=>{window.dispatchEvent(new Event("xitcoin:wallet-disconnect")),s(null),l(!1),localStorage.removeItem("walletConnected")}'
+if (!source.includes(disconnectState)) {
+  throw new Error('Déconnexion wallet introuvable')
+}
+source = source.replace(disconnectState, disconnectStateFixed)
+
 if (source.includes('cronos.org/explorer/api?module=account')) {
   throw new Error('Legacy explorer request remains after patch')
 }
 
 cpSync(baseline, output, { recursive: true })
 writeFileSync(resolve(output, bundle), source)
+const appBundleVersion = createHash('sha256')
+  .update(source)
+  .digest('hex')
+  .slice(0, 12)
+const walletConnectBridgeSource = readFileSync(walletConnectBridge, 'utf8')
+const walletConnectBundleSource = readFileSync(walletConnectBundle, 'utf8')
+const walletConnectBridgeVersion = createHash('sha256').update(walletConnectBridgeSource).digest('hex').slice(0, 12)
+const walletConnectBundleVersion = createHash('sha256').update(walletConnectBundleSource).digest('hex').slice(0, 12)
 const localizationSource = readFileSync(localization, 'utf8')
 const walletPickerSource = readFileSync(walletPicker, 'utf8')
 const walletPickerVersion = createHash('sha256')
@@ -144,10 +174,12 @@ if (!index.includes('</head>') || index.includes('xitcoin-localization.js')) {
 }
 writeFileSync(
   resolve(output, 'index.html'),
-  index.replace('</head>', `    <script src="/assets/xitcoin-wallet-picker.js?v=${walletPickerVersion}"></script>\n    <script defer src="/assets/xitcoin-localization.js?v=${localizationVersion}"></script>\n  </head>`),
+  index.replace(`/${bundle}`, `/${bundle}?v=${appBundleVersion}`).replace('</head>', `    <script>window.__xitcoinWalletConnectAsset="/assets/xitcoin-walletconnect-provider.js?v=${walletConnectBundleVersion}"</script>\n    <script src="/assets/xitcoin-walletconnect-bridge.js?v=${walletConnectBridgeVersion}"></script>\n    <script src="/assets/xitcoin-wallet-picker.js?v=${walletPickerVersion}"></script>\n    <script defer src="/assets/xitcoin-localization.js?v=${localizationVersion}"></script>\n  </head>`),
 )
 writeFileSync(resolve(output, 'assets/xitcoin-localization.js'), localizationSource)
 writeFileSync(resolve(output, 'assets/xitcoin-wallet-picker.js'), walletPickerSource)
+writeFileSync(resolve(output, 'assets/xitcoin-walletconnect-bridge.js'), walletConnectBridgeSource)
+writeFileSync(resolve(output, 'assets/xitcoin-walletconnect-provider.js'), walletConnectBundleSource)
 writeFileSync(resolve(output, 'BUILD-METADATA.json'), JSON.stringify({
   generated_at: new Date().toISOString(),
   source: 'legacy-deployment/dist',
