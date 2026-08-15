@@ -1,0 +1,6 @@
+
+/site/
+wallets/vendor/node_modules/
+wallets/xitcoin-walletconnect-provider.js
+/legacy-deployment/*.tar.gz
+/legacy-deployment/*.zip
